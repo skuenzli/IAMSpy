@@ -166,6 +166,18 @@ import pytest
             ),
             True,
         ),
+        (
+            {"gaads": ["allow-testing-s3.json"], "resources": ["resource-s3-implicit-deny-via-condition.json"]},
+            (
+                "arn:aws:iam::111111111111:role/testing",
+                "s3:GetObject",
+                "arn:aws:s3:::bucket",
+                ["aws:PrincipalArn=arn:aws:iam::111111111111:role/testing"],
+                None,
+                True,
+            ),
+            False,
+        ),
     ],
 )
 def test_can_i(files, inp, out):
