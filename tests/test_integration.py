@@ -171,7 +171,7 @@ import pytest
             (
                 "arn:aws:iam::111111111111:role/testing",
                 "s3:GetObject",
-                "arn:aws:s3:::bucket",
+                "arn:aws:s3:::bucket/obj-1",
                 ["aws:PrincipalArn=arn:aws:iam::111111111111:role/testing"],
                 None,
                 True,
