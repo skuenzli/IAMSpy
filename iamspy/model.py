@@ -8,7 +8,6 @@ from iamspy import parse
 from iamspy.datatypes import parse_string
 from iamspy.utils import get_conditions, get_vars
 
-
 logger = logging.getLogger("iamspy.model")
 
 
@@ -104,10 +103,13 @@ class Model:
         conditions: Optional[List[str]] = None,
         condition_file: Optional[str] = None,
         strict_conditions: bool = False,
-        model_conditions: Set[str] = set(),
+        model_conditions: Set[str] = None,
     ):
         if conditions is None:
             conditions = []
+
+        if model_conditions is None:
+            model_conditions = set()
 
         output = self.generate_evaluation_logic_checks(source, resource)
 
@@ -178,6 +180,7 @@ class Model:
 
             solver.add(*query_conditions)
 
+            logger.debug(f'can_i complete solver:\n{solver}')
             if debug:
                 return solver
             else:

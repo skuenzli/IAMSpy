@@ -380,6 +380,8 @@ def generate_evaluation_logic_checks(model_vars, source: Optional[str], resource
     resource_check = z3.Bool(resource_identifier)
     constraints.append(z3.Bool("resource") == resource_check)
     constraints.append(z3.Bool(f"deny_resource_{resource}") == True)  # noqa: E712
+
+    # is this where we should add resource policy conditions from model_vars?
     if resource.startswith("arn:aws:s3:::") and "/" in resource:
         bucket_resource = resource.split("/")[0]
         logger.info(f"Associating {bucket_resource} policy with bucket object {resource}")
@@ -402,6 +404,12 @@ def generate_evaluation_logic_checks(model_vars, source: Optional[str], resource
             constraints.append(identity_check == False)  # noqa: E712
         source_account = source.split(":")[4]
         constraints.append(z3.String("s_account") == z3.StringVal(source_account))
+        # TODO: skuenzli WIP add specified context keys to identity side of model so conditions in resource policy are respected
+        constraints.extend([
+            z3.Bool("condition_aws:PrincipalArn_exists") == True,  # noqa: E712
+            z3.String("condition_aws:PrincipalArn") == z3.StringVal(source),
+        ])
+
     else:
         identities = [x for x in model_vars if x.startswith("identity")]
         identities = [
@@ -409,6 +417,7 @@ def generate_evaluation_logic_checks(model_vars, source: Optional[str], resource
             for x in identities
             if len(x.split(":")) > 4 and (x.split(":")[5].startswith("user") or x.split(":")[5].startswith("role"))
         ]
+        conditions = [x for x in model_vars if x.startswith("condition_")]
         identity_identifiers = [
             z3.And(
                 z3.Bool(x),
